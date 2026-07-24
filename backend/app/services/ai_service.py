@@ -29,6 +29,36 @@ def _normalize_score(value):
     return 0
 
 
+def _calculate_fallback_score(resume_text: str, job_description: str, skills, missing_skills):
+    resume_lower = (resume_text or "").lower()
+    job_lower = (job_description or "").lower()
+
+    resume_keywords = set(re.findall(r"[a-z0-9+#.]+", resume_lower))
+    job_keywords = set(re.findall(r"[a-z0-9+#.]+", job_lower))
+
+    if job_keywords:
+        overlap = resume_keywords & job_keywords
+        if overlap:
+            overlap_score = int((len(overlap) / max(1, len(job_keywords))) * 100)
+        else:
+            overlap_score = 0
+    else:
+        overlap_score = 0
+
+    matched_count = len([skill for skill in skills if skill.lower() in resume_lower])
+    missing_count = len([skill for skill in missing_skills if skill.lower() in resume_lower])
+
+    if skills or missing_skills:
+        skill_score = int((matched_count / max(1, len(skills) + len(missing_skills))) * 100)
+    else:
+        skill_score = 0
+
+    combined_score = int((overlap_score * 0.5) + (skill_score * 0.5))
+    if combined_score < 20 and (skills or missing_skills):
+        combined_score = 20
+    return max(0, min(100, combined_score))
+
+
 def parse_analysis_response(content: str):
     cleaned = content.strip()
     cleaned = cleaned.replace("```json", "").replace("```", "").strip()
@@ -101,6 +131,20 @@ Job Description:
     print("=======================================")
 
     parsed = parse_analysis_response(content)
+
+    if parsed["score"] == 0 and any([
+        parsed["skills"],
+        parsed["missing_skills"],
+        parsed["strengths"],
+        parsed["weaknesses"],
+        parsed["suggestions"],
+    ]):
+        parsed["score"] = _calculate_fallback_score(
+            resume_text,
+            job_description,
+            parsed["skills"],
+            parsed["missing_skills"],
+        )
 
     if parsed["score"] == 0 and not any([
         parsed["skills"],

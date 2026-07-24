@@ -91,3 +91,20 @@ def get_analysis(
         "weaknesses": analysis.weaknesses.split("\n") if analysis.weaknesses else [],
         "suggestions": analysis.suggestions.split("\n") if analysis.suggestions else []
     }
+
+@router.get("/latest/summary")
+def get_latest_resume_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    resume = db.query(Resume).filter(Resume.user_id == current_user.id).order_by(Resume.id.desc()).first()
+    if not resume:
+        return {"has_resume": False}
+        
+    return {
+        "has_resume": True,
+        "resume_id": resume.id,
+        "filename": resume.original_file_name,
+        "score": resume.analysis.score if resume.analysis else 0,
+        "uploaded_at": resume.uploaded_at
+    }

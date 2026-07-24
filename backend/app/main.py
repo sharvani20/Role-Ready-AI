@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
 load_dotenv()
-from fastapi import FastAPI
+from fastapi import FastAPI,APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import Base, engine
-from app.routers import auth, users, resumes
+from app.routers import auth, users, resumes, roadmap
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,3 +24,4 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(resumes.router)
+app.include_router(roadmap.router)

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
+
 function Analysis() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -49,8 +50,29 @@ function Analysis() {
       <div className="score-card">
         <h2>Resume Match Score</h2>
         <div className="score">{analysis.score}/100</div>
-      </div>
+        <button
+          onClick={async () => {
+            const token = localStorage.getItem('token')
+            try {
+              const response = await fetch(`http://127.0.0.1:8000/roadmap/generate/${id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+              })
 
+              if (response.ok) {
+                navigate(`/roadmap/${id}`)
+              } else {
+                alert('Could not generate roadmap right now')
+              }
+            } catch (error) {
+              console.error(error)
+              alert('Could not generate roadmap right now')
+            }
+          }}
+        >
+          Generate Learning Roadmap
+        </button>
+      </div>
       <div className="analysis-grid">
         <div className="analysis-card">
           <h3>Matched Skills</h3>
@@ -77,6 +99,7 @@ function Analysis() {
         <h3>Improvement Suggestions</h3>
         <ul>{analysis.suggestions?.map((s, i) => <li key={i}>{s}</li>)}</ul>
       </div>
+
     </div>
   )
 }

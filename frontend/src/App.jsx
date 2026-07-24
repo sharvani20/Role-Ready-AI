@@ -6,6 +6,9 @@ import Analysis from './pages/Analysis'
 import ResumeHistory from './pages/ResumeHistory'
 import Profile from './pages/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
+import SidebarLayout from './components/SidebarLayout'
+import Roadmap from './pages/roadmap'
+import MockInterview from './pages/MockInterview'
 
 function App() {
   return (
@@ -18,7 +21,9 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <SidebarLayout>
+              <Dashboard />
+            </SidebarLayout>
           </ProtectedRoute>
         }
       />
@@ -27,7 +32,9 @@ function App() {
         path="/analysis/:id"
         element={
           <ProtectedRoute>
-            <Analysis />
+            <SidebarLayout>
+              <Analysis />
+            </SidebarLayout>
           </ProtectedRoute>
         }
       />
@@ -36,7 +43,9 @@ function App() {
         path="/resumes"
         element={
           <ProtectedRoute>
-            <ResumeHistory />
+            <SidebarLayout>
+              <ResumeHistory />
+            </SidebarLayout>
           </ProtectedRoute>
         }
       />
@@ -45,7 +54,31 @@ function App() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Profile />
+            <SidebarLayout>
+              <Profile />
+            </SidebarLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/roadmap/:id"
+        element={
+          <ProtectedRoute>
+            <SidebarLayout>
+              <Roadmap />
+            </SidebarLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/mock-interview"
+        element={
+          <ProtectedRoute>
+            <SidebarLayout>
+              <MockInterview />
+            </SidebarLayout>
           </ProtectedRoute>
         }
       />
