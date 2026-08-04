@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Calendar, Award, Clock } from 'lucide-react'
+import { FileText, Calendar, Award } from 'lucide-react'
 import HeroSection from '../components/dashboard/HeroSection'
 import ProgressCard from '../components/dashboard/ProgressCard'
 import StatsCard from '../components/dashboard/StatsCard'
@@ -22,68 +22,74 @@ function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [roadmapProgress, setRoadmapProgress] = useState({ percent: 0, completedCount: 0, text: '0/4 weeks' })
-  const [mockInterviewStats, setMockInterviewStats] = useState({ count: 0, avgScore: 'N/A' })
-  const [recentInterviews, setRecentInterviews] = useState([])
-
-  // Fetch Dashboard Summary
-  const fetchSummary = async () => {
-    setLoading(true)
-    setError(null)
-    const token = localStorage.getItem('token')
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/resumes/latest/summary', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch summary data from dashboard api.')
-      }
-
-      const data = await response.json()
-      setSummary(data)
-
-      // Calculate roadmap progress
-      if (data.has_resume && data.resume_id) {
-        const completedKey = `role_ready_roadmap_${data.resume_id}_completed`
-        const completedStr = localStorage.getItem(completedKey)
-        const completedList = completedStr ? JSON.parse(completedStr) : []
-        const percent = Math.round((completedList.length / 4) * 100)
-        setRoadmapProgress({
-          percent: percent,
-          completedCount: completedList.length,
-          text: `${completedList.length}/4 weeks completed`
-        })
-      } else {
-        setRoadmapProgress({ percent: 0, completedCount: 0, text: 'No active roadmap' })
-      }
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Load all data
-  useEffect(() => {
-    fetchSummary()
-
-    // Load mock interview stats
+  const [mockInterviewStats] = useState(() => {
     const interviewsStr = localStorage.getItem('role_ready_completed_interviews')
     if (interviewsStr) {
       const interviews = JSON.parse(interviewsStr)
-      setRecentInterviews(interviews.slice(-3).reverse())
       if (interviews.length > 0) {
         const totalScore = interviews.reduce((sum, item) => sum + item.score, 0)
         const avg = Math.round(totalScore / interviews.length)
-        setMockInterviewStats({
+        return {
           count: interviews.length,
           avgScore: `${avg}/100`
-        })
+        }
       }
     }
-  }, [])
+    return { count: 0, avgScore: 'N/A' }
+  })
+  const [recentInterviews] = useState(() => {
+    const interviewsStr = localStorage.getItem('role_ready_completed_interviews')
+    if (interviewsStr) {
+      const interviews = JSON.parse(interviewsStr)
+      return interviews.slice(-3).reverse()
+    }
+    return []
+  })
+  const [retryTrigger, setRetryTrigger] = useState(0)
+
+  // Load all data
+  useEffect(() => {
+    const fetchSummary = async () => {
+      setLoading(true)
+      setError(null)
+      const token = localStorage.getItem('token')
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/resumes/latest/summary', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch summary data from dashboard api.')
+        }
+
+        const data = await response.json()
+        setSummary(data)
+
+        // Calculate roadmap progress
+        if (data.has_resume && data.resume_id) {
+          const completedKey = `role_ready_roadmap_${data.resume_id}_completed`
+          const completedStr = localStorage.getItem(completedKey)
+          const completedList = completedStr ? JSON.parse(completedStr) : []
+          const percent = Math.round((completedList.length / 4) * 100)
+          setRoadmapProgress({
+            percent: percent,
+            completedCount: completedList.length,
+            text: `${completedList.length}/4 weeks completed`
+          })
+        } else {
+          setRoadmapProgress({ percent: 0, completedCount: 0, text: 'No active roadmap' })
+        }
+      } catch (err) {
+        console.error(err)
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSummary()
+  }, [retryTrigger])
 
   // Handle Resume Upload
   const handleUploadSubmit = async (file, jobDescription) => {
@@ -227,6 +233,36 @@ function Dashboard() {
 
   const recAction = getAIRecommendation()
   const activities = getActivities()
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col justify-center items-center min-h-[50vh] py-20 text-center space-y-4">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <h2 className="text-lg font-bold text-slate-800">Loading placement dashboard...</h2>
+        <p className="text-xs text-slate-500">Retrieving your resume summary and preparation goals.</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col justify-center items-center min-h-[50vh] py-20">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-md w-full text-center space-y-6 shadow-sm">
+          <span className="text-4xl">⚠️</span>
+          <div className="space-y-2">
+            <h2 className="text-xl font-extrabold text-red-600">Something went wrong</h2>
+            <p className="text-sm text-slate-500">{error}</p>
+          </div>
+          <button
+            onClick={() => setRetryTrigger(prev => prev + 1)}
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm cursor-pointer"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-slate-50">

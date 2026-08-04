@@ -10,45 +10,46 @@ function Roadmap() {
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('timeline')
   const [completedWeeks, setCompletedWeeks] = useState([])
-
-  const loadRoadmap = async () => {
-    setLoading(true)
-    setError(null)
-    const token = localStorage.getItem('token')
-
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/roadmap/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Roadmap not found. Please ensure analysis is complete.')
-        }
-        throw new Error('Failed to load roadmap. Please try again later.')
-      }
-
-      const data = await response.json()
-      setRoadmap(data)
-
-      // Initialize completed weeks from localStorage
-      const storedCompleted = localStorage.getItem(`role_ready_roadmap_${id}_completed`)
-      if (storedCompleted) {
-        setCompletedWeeks(JSON.parse(storedCompleted))
-      } else {
-        setCompletedWeeks([])
-      }
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [retryTrigger, setRetryTrigger] = useState(0)
 
   useEffect(() => {
+    async function loadRoadmap() {
+      setLoading(true)
+      setError(null)
+      const token = localStorage.getItem('token')
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/roadmap/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Roadmap not found. Please ensure analysis is complete.')
+          }
+          throw new Error('Failed to load roadmap. Please try again later.')
+        }
+
+        const data = await response.json()
+        setRoadmap(data)
+
+        // Initialize completed weeks from localStorage
+        const storedCompleted = localStorage.getItem(`role_ready_roadmap_${id}_completed`)
+        if (storedCompleted) {
+          setCompletedWeeks(JSON.parse(storedCompleted))
+        } else {
+          setCompletedWeeks([])
+        }
+      } catch (err) {
+        console.error(err)
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     loadRoadmap()
-  }, [id])
+  }, [id, retryTrigger])
 
   const handleToggleWeek = (weekNum) => {
     let updated
@@ -122,7 +123,7 @@ function Roadmap() {
           <p className="text-sm text-slate-500">{error}</p>
         </div>
         <button 
-          onClick={loadRoadmap}
+          onClick={() => setRetryTrigger(prev => prev + 1)}
           className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm cursor-pointer"
         >
           Try Again
