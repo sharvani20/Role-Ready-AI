@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const INTERVIEW_QUESTIONS = {
@@ -365,10 +365,14 @@ function MockInterview() {
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#374151' }}>
+            <label
+              htmlFor="interview-answer-textarea"
+              style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#374151' }}
+            >
               Type Your Answer Below:
             </label>
             <textarea
+              id="interview-answer-textarea"
               rows={8}
               placeholder="Structure your thoughts. Mention core terms, diagrams, algorithms, and practical experiences..."
               value={currentAnswer}
@@ -381,9 +385,30 @@ function MockInterview() {
                 fontFamily: 'Arial, sans-serif',
                 fontSize: '0.98rem',
                 lineHeight: 1.5,
-                outline: 'none'
+                outline: 'none',
+                marginBottom: '0.25rem'
               }}
             />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '0.5rem',
+              fontSize: '0.875rem'
+            }}>
+              {currentAnswer.length < 20 ? (
+                <span style={{ color: '#d97706', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  ⚠️ Under 20 characters - try to elaborate more for a full evaluation!
+                </span>
+              ) : (
+                <span style={{ color: '#16a34a', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  ✅ Answer length is good for detailed grading
+                </span>
+              )}
+              <span style={{ color: '#6b7280', fontWeight: 600 }}>
+                {currentAnswer.length} characters
+              </span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '1rem' }}>
