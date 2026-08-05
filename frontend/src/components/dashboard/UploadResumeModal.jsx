@@ -107,10 +107,14 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
 
               {/* Job Description */}
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
+                <label
+                  htmlFor="job-description-textarea"
+                  className="block text-sm font-semibold text-slate-900 mb-3"
+                >
                   Target Job Description
                 </label>
                 <textarea
+                  id="job-description-textarea"
                   placeholder="Paste the target job description or requirements here..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
