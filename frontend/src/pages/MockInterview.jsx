@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const INTERVIEW_QUESTIONS = {
@@ -365,10 +365,26 @@ function MockInterview() {
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#374151' }}>
-              Type Your Answer Below:
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <label
+                htmlFor="interview-answer-input"
+                style={{ fontSize: '0.9rem', fontWeight: 700, color: '#374151' }}
+              >
+                Type Your Answer Below:
+              </label>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: currentAnswer.length < 20 ? '#dc2626' : '#16a34a',
+                  transition: 'color 0.2s ease'
+                }}
+              >
+                {currentAnswer.length} characters {currentAnswer.length < 20 ? '(min 20 required for full analysis)' : '(ready for evaluation ✨)'}
+              </span>
+            </div>
             <textarea
+              id="interview-answer-input"
               rows={8}
               placeholder="Structure your thoughts. Mention core terms, diagrams, algorithms, and practical experiences..."
               value={currentAnswer}
@@ -376,12 +392,15 @@ function MockInterview() {
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '1px solid #d1d5db',
+                border: '1px solid',
+                borderColor: currentAnswer.length > 0 && currentAnswer.length < 20 ? '#fca5a5' : '#d1d5db',
                 borderRadius: '10px',
                 fontFamily: 'Arial, sans-serif',
                 fontSize: '0.98rem',
                 lineHeight: 1.5,
-                outline: 'none'
+                outline: 'none',
+                boxShadow: currentAnswer.length >= 20 ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                transition: 'all 0.2s ease'
               }}
             />
           </div>
