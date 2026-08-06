@@ -33,9 +33,14 @@ function Register() {
         <h1>PlaceMentor AI</h1>
         <h2>Register</h2>
 
-        <input placeholder="Username" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <label htmlFor="register-username" className="sr-only">Username</label>
+        <input id="register-username" placeholder="Username" value={name} onChange={(e) => setName(e.target.value)} />
+
+        <label htmlFor="register-email" className="sr-only">Email</label>
+        <input id="register-email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+
+        <label htmlFor="register-password" className="sr-only">Password</label>
+        <input id="register-password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
         <button type="submit">Register</button>
 

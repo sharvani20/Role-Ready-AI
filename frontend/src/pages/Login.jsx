@@ -35,9 +35,11 @@ function Login() {
         <h1>Role Ready AI</h1>
         <h2>Login</h2>
 
-        <input placeholder="Username" value={name} onChange={(e) => setName(e.target.value)} />
+        <label htmlFor="login-username" className="sr-only">Username</label>
+        <input id="login-username" placeholder="Username" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <label htmlFor="login-password" className="sr-only">Password</label>
+        <input id="login-password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
         <button type="submit">Login</button>
 
