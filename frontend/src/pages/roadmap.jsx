@@ -47,7 +47,9 @@ function Roadmap() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadRoadmap()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const handleToggleWeek = (weekNum) => {
