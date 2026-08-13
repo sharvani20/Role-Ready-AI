@@ -436,7 +436,7 @@ html {
   width: 100%;
 }
 
-.max-w-[1600px] {
+.max-w-\[1600px\] {
   max-width: 1600px;
 }
 
@@ -481,7 +481,7 @@ html {
   border-radius: 0.75rem;
 }
 
-.h-2.5 {
+.h-2\.5 {
   height: 0.625rem;
 }
 

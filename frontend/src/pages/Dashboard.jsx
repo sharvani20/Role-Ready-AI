@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { FileText, Calendar, Award, Clock } from 'lucide-react'
+import { FileText, Calendar, Award } from 'lucide-react'
 import HeroSection from '../components/dashboard/HeroSection'
 import ProgressCard from '../components/dashboard/ProgressCard'
 import StatsCard from '../components/dashboard/StatsCard'
@@ -17,8 +17,6 @@ function Dashboard() {
 
   // State Management
   const [summary, setSummary] = useState({ has_resume: false })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [roadmapProgress, setRoadmapProgress] = useState({ percent: 0, completedCount: 0, text: '0/4 weeks' })
@@ -26,9 +24,7 @@ function Dashboard() {
   const [recentInterviews, setRecentInterviews] = useState([])
 
   // Fetch Dashboard Summary
-  const fetchSummary = async () => {
-    setLoading(true)
-    setError(null)
+  const fetchSummary = useCallback(async (isMounted) => {
     const token = localStorage.getItem('token')
 
     try {
@@ -41,6 +37,7 @@ function Dashboard() {
       }
 
       const data = await response.json()
+      if (!isMounted) return
       setSummary(data)
 
       // Calculate roadmap progress
@@ -59,15 +56,13 @@ function Dashboard() {
       }
     } catch (err) {
       console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [])
 
   // Load all data
   useEffect(() => {
-    fetchSummary()
+    let isMounted = true
+    fetchSummary(isMounted)
 
     // Load mock interview stats
     const interviewsStr = localStorage.getItem('role_ready_completed_interviews')
@@ -83,7 +78,10 @@ function Dashboard() {
         })
       }
     }
-  }, [])
+    return () => {
+      isMounted = false
+    }
+  }, [fetchSummary])
 
   // Handle Resume Upload
   const handleUploadSubmit = async (file, jobDescription) => {

@@ -66,7 +66,8 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
               <button 
                 onClick={onClose}
                 disabled={isLoading}
-                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Close upload modal"
+                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -76,8 +77,8 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {/* File Upload */}
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
-                  Upload Resume (PDF)
+                <label htmlFor="resume-upload-input" className="block text-sm font-semibold text-slate-900 mb-3">
+                  Upload Resume (PDF) <span className="text-rose-500">*</span>
                 </label>
                 
                 <div
@@ -85,7 +86,9 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
                   onDrop={handleDrop}
                   className="relative"
                 >
-                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 cursor-pointer transition-all duration-200"
+                  <label
+                    htmlFor="resume-upload-input"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 hover:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 cursor-pointer transition-all duration-200"
                   >
                     <div className="flex flex-col items-center justify-center py-8 text-center px-4">
                       <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
@@ -95,11 +98,12 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
                       <span className="text-sm text-slate-500 mt-1">PDF file (Max 10MB)</span>
                     </div>
                     <input 
+                      id="resume-upload-input"
                       type="file" 
                       accept=".pdf" 
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
                       disabled={isLoading}
-                      className="hidden"
+                      className="sr-only"
                     />
                   </label>
                 </div>
@@ -107,10 +111,11 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
 
               {/* Job Description */}
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
+                <label htmlFor="job-description-textarea" className="block text-sm font-semibold text-slate-900 mb-3">
                   Target Job Description
                 </label>
                 <textarea
+                  id="job-description-textarea"
                   placeholder="Paste the target job description or requirements here..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
