@@ -1,5 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import {
+  Mic,
+  Loader2,
+  Rocket,
+  CheckCircle2,
+  AlertTriangle,
+  Lightbulb,
+  Target,
+  MessageSquare
+} from 'lucide-react'
+import './MockInterview.css'
 
 const INTERVIEW_QUESTIONS = {
   software: [
@@ -132,6 +144,9 @@ function MockInterview() {
   const [step, setStep] = useState('setup') // setup, active, loading, report
   const [category, setCategory] = useState('software')
   const [level, setLevel] = useState('mid')
+  const [targetRole, setTargetRole] = useState('Full Stack Engineer')
+  const [focusSkills, setFocusSkills] = useState(['Docker', 'System Design', 'CI/CD'])
+  const [skillInput, setSkillInput] = useState('')
   
   const [questions, setQuestions] = useState([])
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -139,6 +154,25 @@ function MockInterview() {
   const [currentAnswer, setCurrentAnswer] = useState('')
   
   const [report, setReport] = useState(null)
+
+  const addSkill = () => {
+    const trimmed = skillInput.trim()
+    if (trimmed && !focusSkills.includes(trimmed)) {
+      setFocusSkills([...focusSkills, trimmed])
+    }
+    setSkillInput('')
+  }
+
+  const removeSkill = (skill) => {
+    setFocusSkills(focusSkills.filter(s => s !== skill))
+  }
+
+  const handleSkillKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addSkill()
+    }
+  }
 
   const handleStart = () => {
     const list = INTERVIEW_QUESTIONS[category] || INTERVIEW_QUESTIONS.software
@@ -157,17 +191,15 @@ function MockInterview() {
     if (currentIdx + 1 < questions.length) {
       setCurrentIdx(currentIdx + 1)
     } else {
-      // Process evaluation
       setStep('loading')
       setTimeout(() => {
-        const evalData = EVALUATION_TEMPLATES[category] || EVALUATION_TEMPLATES.software
+        const evalResult = evaluateAnswers(nextAnswers, category)
         
-        // Save to completed interviews list in localStorage
         const newInterview = {
           id: Date.now().toString(),
           category: category,
           categoryName: getCategoryName(category),
-          score: evalData.score,
+          score: evalResult.score,
           level: level,
           date: new Date().toLocaleDateString()
         }
@@ -177,9 +209,8 @@ function MockInterview() {
         currentList.push(newInterview)
         localStorage.setItem('role_ready_completed_interviews', JSON.stringify(currentList))
 
-        // Create detailed report
         setReport({
-          ...evalData,
+          ...evalResult,
           categoryName: getCategoryName(category),
           levelName: getLevelName(level),
           qa: nextAnswers.map((item, idx) => ({
@@ -190,6 +221,156 @@ function MockInterview() {
         })
         setStep('report')
       }, 2000)
+    }
+  }
+
+  // Dynamic answer evaluation based on actual content
+  const evaluateAnswers = (answers, cat) => {
+    const KEYWORDS = {
+      software: ['algorithm', 'complexity', 'hash', 'tree', 'array', 'linked list', 'stack', 'queue', 'sort', 'search', 'binary', 'recursion', 'dynamic programming', 'graph', 'node', 'pointer', 'memory', 'time', 'space', 'O(n)', 'O(1)', 'O(log', 'data structure', 'index', 'database'],
+      frontend: ['react', 'dom', 'virtual dom', 'component', 'state', 'props', 'hooks', 'useEffect', 'useState', 'css', 'html', 'javascript', 'render', 'layout', 'responsive', 'flexbox', 'grid', 'api', 'fetch', 'performance', 'bundle', 'webpack', 'vite', 'browser', 'event'],
+      backend: ['api', 'rest', 'database', 'sql', 'query', 'index', 'server', 'endpoint', 'authentication', 'jwt', 'token', 'session', 'cache', 'orm', 'schema', 'migration', 'middleware', 'http', 'request', 'response', 'acid', 'transaction', 'security'],
+      ai_ml: ['model', 'training', 'neural', 'network', 'layer', 'gradient', 'loss', 'function', 'regression', 'classification', 'feature', 'dataset', 'overfitting', 'regularization', 'accuracy', 'precision', 'recall', 'epoch', 'batch', 'learning rate', 'weight', 'bias', 'activation'],
+      behavioral: ['team', 'challenge', 'result', 'situation', 'task', 'action', 'outcome', 'leadership', 'communication', 'deadline', 'conflict', 'collaborate', 'prioritize', 'feedback', 'learned', 'improve', 'goal', 'problem', 'solution', 'stakeholder']
+    }
+
+    const keywords = KEYWORDS[cat] || KEYWORDS.software
+    let totalAccuracy = 0
+    let totalCommunication = 0
+    let totalStructure = 0
+    let answeredCount = 0
+    let skippedCount = 0
+    let shortCount = 0
+    let goodCount = 0
+
+    answers.forEach((item) => {
+      const ans = item.answer.toLowerCase().trim()
+      const wordCount = ans.split(/\s+/).filter(w => w.length > 0).length
+
+      // Skip detection
+      if (ans === 'no answer provided.' || ans === 'skipped' || ans.length < 5) {
+        skippedCount++
+        return
+      }
+
+      answeredCount++
+
+      // Accuracy: keyword matching (how many relevant terms used)
+      const matchedKeywords = keywords.filter(kw => ans.includes(kw.toLowerCase()))
+      const keywordScore = Math.min((matchedKeywords.length / 4) * 100, 100)
+
+      // Communication: answer length and sentence structure
+      let commScore = 0
+      if (wordCount < 10) {
+        commScore = 15
+        shortCount++
+      } else if (wordCount < 30) {
+        commScore = 40
+        shortCount++
+      } else if (wordCount < 60) {
+        commScore = 65
+      } else if (wordCount < 120) {
+        commScore = 80
+        goodCount++
+      } else {
+        commScore = 92
+        goodCount++
+      }
+
+      // Structure: checks for explanations, examples, multiple sentences
+      let structScore = 0
+      const sentences = ans.split(/[.!?]+/).filter(s => s.trim().length > 0).length
+      const hasExample = ans.includes('example') || ans.includes('for instance') || ans.includes('such as') || ans.includes('e.g.')
+      const hasReasoning = ans.includes('because') || ans.includes('therefore') || ans.includes('since') || ans.includes('reason')
+
+      if (sentences >= 4) structScore += 35
+      else if (sentences >= 2) structScore += 20
+      else structScore += 8
+
+      if (hasExample) structScore += 25
+      if (hasReasoning) structScore += 20
+      structScore += Math.min(wordCount * 0.3, 20) // bonus for detail
+      structScore = Math.min(structScore, 100)
+
+      totalAccuracy += keywordScore
+      totalCommunication += commScore
+      totalStructure += structScore
+    })
+
+    const totalQuestions = answers.length
+
+    // If no questions were actually answered
+    if (answeredCount === 0) {
+      return {
+        score: 0,
+        accuracy: 0,
+        communication: 0,
+        structure: 0,
+        strengths: [
+          'Completed the interview session.'
+        ],
+        weaknesses: [
+          'No answers were provided for any question.',
+          'All questions were either skipped or left blank.',
+          'Unable to assess technical knowledge without responses.'
+        ],
+        suggestions: [
+          'Attempt to answer every question, even with a brief response.',
+          'Review the core concepts for this category before retaking the interview.',
+          'Practice writing structured answers using the STAR method for behavioral and clear definitions for technical questions.'
+        ]
+      }
+    }
+
+    // Calculate averages only from answered questions
+    const avgAccuracy = Math.round(totalAccuracy / answeredCount)
+    const avgCommunication = Math.round(totalCommunication / answeredCount)
+    const avgStructure = Math.round(totalStructure / answeredCount)
+
+    // Penalize overall score for skipped questions
+    const answerRatio = answeredCount / totalQuestions
+    const rawScore = Math.round((avgAccuracy * 0.4 + avgCommunication * 0.35 + avgStructure * 0.25))
+    const finalScore = Math.round(rawScore * answerRatio) // penalty for skipping
+
+    // Generate dynamic strengths
+    const strengths = []
+    if (avgAccuracy >= 70) strengths.push('Used relevant technical terminology and domain-specific keywords effectively.')
+    if (avgAccuracy >= 40 && avgAccuracy < 70) strengths.push('Demonstrated some familiarity with core concepts in this domain.')
+    if (avgCommunication >= 70) strengths.push('Provided detailed, well-articulated responses with adequate depth.')
+    if (avgCommunication >= 40 && avgCommunication < 70) strengths.push('Gave responses of moderate length covering basic aspects.')
+    if (avgStructure >= 70) strengths.push('Answers were well-structured with examples and logical reasoning.')
+    if (avgStructure >= 40 && avgStructure < 70) strengths.push('Showed some structure in responses with multiple points.')
+    if (goodCount === answeredCount) strengths.push('Consistently provided thorough answers across all questions.')
+    if (skippedCount === 0) strengths.push('Attempted all questions without skipping any.')
+    if (strengths.length === 0) strengths.push('Completed the interview session and submitted responses.')
+
+    // Generate dynamic weaknesses
+    const weaknesses = []
+    if (skippedCount > 0) weaknesses.push(`Skipped ${skippedCount} out of ${totalQuestions} questions — this significantly reduces the overall score.`)
+    if (shortCount > 0) weaknesses.push(`${shortCount} answer(s) were too brief — detailed responses demonstrate deeper understanding.`)
+    if (avgAccuracy < 40) weaknesses.push('Responses lacked key technical terms and domain-specific vocabulary.')
+    if (avgCommunication < 40) weaknesses.push('Most answers were too short to properly demonstrate knowledge depth.')
+    if (avgStructure < 40) weaknesses.push('Answers lacked structure — consider using examples, reasons, and multi-sentence explanations.')
+    if (weaknesses.length === 0) weaknesses.push('Minor improvements possible in providing more concrete code examples or real-world scenarios.')
+
+    // Generate dynamic suggestions
+    const suggestions = []
+    if (skippedCount > 0) suggestions.push('Attempt every question — even a partial answer scores better than a skip.')
+    if (avgAccuracy < 60) suggestions.push('Study core terminology and concepts for this domain before retaking the interview.')
+    if (avgCommunication < 60) suggestions.push('Aim for at least 60-80 words per answer to adequately explain your thought process.')
+    if (avgStructure < 60) suggestions.push('Structure your answers with: definition → explanation → example → conclusion.')
+    if (avgAccuracy >= 60 && avgCommunication >= 60) suggestions.push('To reach expert level, add real-world project examples and edge case discussions to your answers.')
+    if (suggestions.length === 0) suggestions.push('Continue practicing to maintain and improve your strong performance.')
+    suggestions.push('Practice answering under timed conditions to simulate real interview pressure.')
+
+    return {
+      score: finalScore,
+      accuracy: avgAccuracy,
+      communication: avgCommunication,
+      structure: avgStructure,
+      strengths,
+      weaknesses,
+      suggestions
     }
   }
 
@@ -243,184 +424,138 @@ function MockInterview() {
   }
 
   return (
-    <div className="roadmap-container">
-      {/* Back Button */}
-      <button className="roadmap-back-btn" onClick={() => navigate('/dashboard')}>
-        ← Back to Dashboard
-      </button>
+    <div className="mi-page">
+      {/* Page Header */}
+      <div className="mi-page-header">
+        <h1 className="mi-page-title">AI Interactive Mock Interview</h1>
+        <p className="mi-page-subtitle">Practice technical & behavioral questions with real-time AI feedback</p>
+      </div>
 
       {step === 'setup' && (
-        <div className="roadmap-panel-card" style={{ maxWidth: '700px', margin: '0 auto' }}>
-          <h2>Configure AI Mock Interview</h2>
-          <p style={{ color: '#4b5563', marginBottom: '1.5rem' }}>
-            Practice technical or behavioral questions generated by our AI. You will write your response, and receive a comprehensive assessment score sheet.
-          </p>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1f2937' }}>
-              1. Choose Interview Focus Area
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {[
-                { id: 'software', label: '💻 Software Engineering (General)', desc: 'Data structures, algorithms, and complexity analysis' },
-                { id: 'frontend', label: '⚡ Frontend Development', desc: 'React, web rendering, JavaScript and UI layout styling' },
-                { id: 'backend', label: '⚙️ Backend Development', desc: 'Databases, API engineering, transaction integrity, scaling' },
-                { id: 'ai_ml', label: '🧠 AI / Machine Learning', desc: 'ML models, deep learning, training pipelines and math' },
-                { id: 'behavioral', label: '💬 Behavioral & Leadership', desc: 'STAR format stories, task prioritization, conflict resolution' }
-              ].map(item => (
-                <div 
-                  key={item.id}
-                  onClick={() => setCategory(item.id)}
-                  style={{
-                    padding: '1rem',
-                    borderRadius: '10px',
-                    border: '2px solid',
-                    borderColor: category === item.id ? '#2563eb' : '#e5e7eb',
-                    backgroundColor: category === item.id ? '#eff6ff' : 'white',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  <strong style={{ display: 'block', color: '#1f2937' }}>{item.label}</strong>
-                  <span style={{ fontSize: '0.85rem', color: '#4b5563' }}>{item.desc}</span>
-                </div>
-              ))}
+        <div className="mi-setup-wrapper">
+          <div className="mi-setup-card">
+            {/* Icon */}
+            <div className="mi-setup-icon">
+              <MessageSquare size={28} />
             </div>
-          </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem', color: '#1f2937' }}>
-              2. Select Experience Target
-            </h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[
-                { id: 'junior', label: 'Junior (0-2 Yrs)' },
-                { id: 'mid', label: 'Mid-Level (2-5 Yrs)' },
-                { id: 'senior', label: 'Senior (5+ Yrs)' }
-              ].map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setLevel(item.id)}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid',
-                    borderColor: level === item.id ? '#2563eb' : '#d1d5db',
-                    backgroundColor: level === item.id ? '#2563eb' : 'white',
-                    color: level === item.id ? 'white' : '#4b5563',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <h2 className="mi-setup-title">Ready for your Mock Interview?</h2>
+            <p className="mi-setup-desc">
+              The AI interviewer will ask questions tailored specifically to your target role and missing skills, evaluating your answers instantly.
+            </p>
+
+            {/* Target Role */}
+            <div className="mi-setup-field">
+              <label>Target Role</label>
+              <input
+                type="text"
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                placeholder="Full Stack Engineer"
+              />
             </div>
-          </div>
 
-          <button 
-            onClick={handleStart}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              backgroundColor: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            Start Mock Interview Rocket
-          </button>
+            {/* Focus Skills */}
+            <div className="mi-setup-field">
+              <label>Focus Skills</label>
+              <div className="mi-skills-tags">
+                {focusSkills.map((skill) => (
+                  <span key={skill} className="mi-skill-tag">
+                    {skill}
+                    <button onClick={() => removeSkill(skill)}>×</button>
+                  </span>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onKeyDown={handleSkillKeyDown}
+                placeholder="Type a skill and press Enter"
+                className="mi-skill-input"
+              />
+            </div>
+
+            {/* Category Selection (hidden but functional) */}
+            <div className="mi-setup-field">
+              <label>Interview Category</label>
+              <div className="mi-category-pills">
+                {[
+                  { id: 'software', label: '💻 Software' },
+                  { id: 'frontend', label: '⚡ Frontend' },
+                  { id: 'backend', label: '⚙️ Backend' },
+                  { id: 'ai_ml', label: '🧠 AI/ML' },
+                  { id: 'behavioral', label: '💬 Behavioral' }
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setCategory(item.id)}
+                    className={`mi-category-pill ${category === item.id ? 'mi-pill-active' : ''}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={handleStart}
+              className="mi-start-btn"
+            >
+              Start Interview Session 🎯
+            </button>
+          </div>
         </div>
       )}
 
       {step === 'active' && (
-        <div className="roadmap-panel-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: '#2563eb' }}>
+        <div className="mi-active-card">
+          <div className="mi-active-header">
+            <span className="mi-active-badge">
               {getCategoryName(category)} — {getLevelName(level)}
             </span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4b5563' }}>
+            <span className="mi-active-progress-text">
               Question {currentIdx + 1} of {questions.length}
             </span>
           </div>
 
-          {/* Progress Tracker */}
-          <div className="roadmap-progress-track" style={{ marginBottom: '2rem' }}>
-            <div 
-              className="roadmap-progress-fill" 
+          <div className="mi-progress-bar">
+            <div
+              className="mi-progress-fill"
               style={{ width: `${((currentIdx) / questions.length) * 100}%` }}
-            ></div>
+            />
           </div>
 
-          <div style={{ minHeight: '100px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#1f2937', fontWeight: 700, lineHeight: 1.4 }}>
-              {questions[currentIdx]}
-            </h3>
+          <div className="mi-question-box">
+            <h3>{questions[currentIdx]}</h3>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#374151' }}>
-              Type Your Answer Below:
-            </label>
+          <div className="mi-answer-section">
+            <label>Type Your Answer Below</label>
             <textarea
               rows={8}
               placeholder="Structure your thoughts. Mention core terms, diagrams, algorithms, and practical experiences..."
               value={currentAnswer}
               onChange={(e) => setCurrentAnswer(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '10px',
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '0.98rem',
-                lineHeight: 1.5,
-                outline: 'none'
-              }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="mi-active-actions">
             <button
               onClick={() => {
                 if (window.confirm('Are you sure you want to finish early? Your current answers will still be graded.')) {
-                  // Grade answers so far
-                  const unanswered = questions.slice(currentIdx).map(q => ({ question: q, answer: 'Skipped' }))
+                  const unanswered = questions.slice(currentIdx).map((q) => ({ question: q, answer: 'Skipped' }))
                   setUserAnswers([...userAnswers, { question: questions[currentIdx], answer: currentAnswer || 'Skipped' }, ...unanswered])
                   handleSubmitAnswer()
                 }
               }}
-              style={{
-                flex: 1,
-                padding: '0.85rem',
-                backgroundColor: '#f3f4f6',
-                color: '#dc2626',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              className="mi-finish-early-btn"
             >
               Finish Early
             </button>
             <button
               onClick={handleSubmitAnswer}
-              style={{
-                flex: 2,
-                padding: '0.85rem',
-                backgroundColor: '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
+              className="mi-submit-btn"
             >
               {currentIdx + 1 === questions.length ? 'Submit Final Responses' : 'Submit & Next Question'}
             </button>
@@ -429,141 +564,89 @@ function MockInterview() {
       )}
 
       {step === 'loading' && (
-        <div className="roadmap-loading-state">
-          <div className="spinner"></div>
+        <div className="mi-loading-card">
+          <Loader2 size={48} className="mi-spin" style={{ color: '#6366f1' }} />
           <h2>Evaluating Performance</h2>
           <p>Assessing response completeness, technical depth, accuracy, and communication structure...</p>
         </div>
       )}
 
       {step === 'report' && report && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* Summary Score Sheet */}
-          <div className="roadmap-header-section" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{
-              width: '120px',
-              height: '120px',
-              borderRadius: '50%',
-              background: '#eff6ff',
-              border: '6px solid #2563eb',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'center',
-              flexShrink: 0
-            }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#2563eb' }}>{report.score}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', textTransform: 'uppercase' }}>Score</span>
+        <div className="mi-report">
+          {/* Score Header */}
+          <div className="mi-report-header">
+            <div className="mi-report-score-circle">
+              <span className="mi-report-score-val">{report.score}</span>
+              <span className="mi-report-score-label">Score</span>
             </div>
-
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
-                Performance Evaluation Report
-              </h2>
-              <p style={{ color: '#4b5563', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>
-                Target Profile: <strong>{report.categoryName} ({report.levelName})</strong>
-              </p>
-              
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <span className="week-hours-badge">🎯 Accuracy: {report.accuracy}/100</span>
-                <span className="week-hours-badge">🗣️ Comm: {report.communication}/100</span>
-                <span className="week-hours-badge">🧠 Structure: {report.structure}/100</span>
+            <div className="mi-report-info">
+              <h2>Performance Evaluation Report</h2>
+              <p>Target Profile: <strong>{report.categoryName} ({report.levelName})</strong></p>
+              <div className="mi-report-metrics">
+                {[
+                  { label: 'Accuracy', val: report.accuracy, icon: Target },
+                  { label: 'Communication', val: report.communication, icon: Mic },
+                  { label: 'Structure', val: report.structure, icon: CheckCircle2 }
+                ].map(({ label, val, icon: Icon }) => (
+                  <span key={label} className="mi-metric-badge">
+                    <Icon size={14} /> {label}: {val}/100
+                  </span>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Strengths & Suggestions Grid */}
-          <div className="roadmap-list-grid">
-            <div className="roadmap-panel-card" style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#065f46', marginBottom: '1rem' }}>
-                ✅ Key Strengths
-              </h3>
-              <ul className="cert-list">
+          {/* Strengths & Weaknesses */}
+          <div className="mi-report-grid">
+            <div className="mi-report-card mi-report-strengths">
+              <h3><CheckCircle2 size={18} /> Key Strengths</h3>
+              <ul>
                 {report.strengths.map((str, i) => (
-                  <li key={i} className="cert-item" style={{ borderColor: '#a7f3d0', background: '#f0fdf4', color: '#14532d' }}>
-                    <span>⭐</span>
-                    <span>{str}</span>
-                  </li>
+                  <li key={i}><span>⭐</span><span>{str}</span></li>
                 ))}
               </ul>
             </div>
-
-            <div className="roadmap-panel-card" style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#b45309', marginBottom: '1rem' }}>
-                ⚡ Areas for Improvement
-              </h3>
-              <ul className="advice-list">
+            <div className="mi-report-card mi-report-weaknesses">
+              <h3><AlertTriangle size={18} /> Areas for Improvement</h3>
+              <ul>
                 {report.weaknesses.map((weak, i) => (
-                  <li key={i} className="advice-item" style={{ borderLeftColor: '#f59e0b', background: '#fffbeb', color: '#78350f' }}>
-                    <span>💡</span>
-                    <span>{weak}</span>
-                  </li>
+                  <li key={i}><span>💡</span><span>{weak}</span></li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Action suggestions */}
-          <div className="roadmap-panel-card">
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1f2937', marginBottom: '1rem' }}>
-              📚 Learning Action Plan
-            </h3>
-            <ul className="cert-list">
+          {/* Suggestions */}
+          <div className="mi-report-card">
+            <h3><Lightbulb size={18} style={{ color: '#7c3aed' }} /> Learning Action Plan</h3>
+            <ul>
               {report.suggestions.map((sug, i) => (
-                <li key={i} className="cert-item" style={{ border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1e40af' }}>
-                  <span>🚀</span>
-                  <span>{sug}</span>
-                </li>
+                <li key={i} className="mi-suggestion-item"><span>🚀</span><span>{sug}</span></li>
               ))}
             </ul>
           </div>
 
-          {/* Detailed QA breakdown */}
-          <div className="roadmap-panel-card">
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-              Detailed Question Analysis
-            </h2>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Detailed Q&A */}
+          <div className="mi-report-card">
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 20px 0' }}>Detailed Question Analysis</h2>
+            <div className="mi-qa-list">
               {report.qa.map((item, i) => (
-                <div 
-                  key={i} 
-                  style={{
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '12px',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <div style={{ background: '#f9fafb', padding: '1rem', borderBottom: '1px solid #e5e7eb' }}>
+                <div key={i} className="mi-qa-item">
+                  <div className="mi-qa-question">
                     <strong>Q{i + 1}: {item.question}</strong>
                   </div>
-                  <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="mi-qa-body">
                     <div>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>
-                        Your Answer:
-                      </span>
-                      <p style={{ background: '#fcfcfd', border: '1px solid #f3f4f6', padding: '0.75rem', borderRadius: '6px', fontSize: '0.95rem', fontStyle: 'italic' }}>
-                        "{item.answer}"
-                      </p>
+                      <span className="mi-qa-label">Your Answer</span>
+                      <p className="mi-qa-answer">&ldquo;{item.answer}&rdquo;</p>
                     </div>
-
                     <div>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: '#2563eb', display: 'block', marginBottom: '0.25rem' }}>
-                        Expert Feedback:
-                      </span>
-                      <p style={{ fontSize: '0.95rem', color: '#374151' }}>
-                        {item.feedback}
-                      </p>
+                      <span className="mi-qa-label mi-qa-label-indigo">Expert Feedback</span>
+                      <p>{item.feedback}</p>
                     </div>
-
                     <div>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: '#059669', display: 'block', marginBottom: '0.25rem' }}>
-                        Sample Answer Guideline:
-                      </span>
-                      <p style={{ background: '#f0fdf4', border: '1px solid #d1fae5', padding: '0.75rem', borderRadius: '6px', fontSize: '0.95rem', color: '#065f46' }}>
-                        {item.ideal}
-                      </p>
+                      <span className="mi-qa-label mi-qa-label-green">Sample Answer Guideline</span>
+                      <p className="mi-qa-ideal">{item.ideal}</p>
                     </div>
                   </div>
                 </div>
@@ -571,37 +654,13 @@ function MockInterview() {
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button
-              onClick={() => setStep('setup')}
-              style={{
-                flex: 1,
-                padding: '1rem',
-                backgroundColor: '#f3f4f6',
-                color: '#2563eb',
-                border: '1px solid #bfdbfe',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Try Another Interview Focus
+          {/* Actions */}
+          <div className="mi-report-actions">
+            <button onClick={() => setStep('setup')} className="mi-try-again-btn">
+              Try Another Focus
             </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                flex: 1,
-                padding: '1rem',
-                backgroundColor: '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              Return to Placement Dashboard
+            <button onClick={() => navigate('/resume-analyzer')} className="mi-return-btn">
+              Return to Resume Analyzer
             </button>
           </div>
         </div>

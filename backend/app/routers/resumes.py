@@ -108,3 +108,19 @@ def get_latest_resume_summary(
         "score": resume.analysis.score if resume.analysis else 0,
         "uploaded_at": resume.uploaded_at
     }
+
+@router.get("/list")
+def list_resumes(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    resumes = db.query(Resume).filter(Resume.user_id == current_user.id).order_by(Resume.id.desc()).all()
+    result = []
+    for r in resumes:
+        result.append({
+            "resume_id": r.id,
+            "filename": r.original_file_name,
+            "score": r.analysis.score if r.analysis else 0,
+            "uploaded_at": r.uploaded_at
+        })
+    return result

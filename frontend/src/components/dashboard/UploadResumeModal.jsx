@@ -1,20 +1,53 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, X, UploadCloud, Loader2, ArrowRight } from 'lucide-react'
 
-function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  FileText,
+  X,
+  UploadCloud,
+  Loader2,
+  ArrowRight,
+  CheckCircle
+} from 'lucide-react'
+
+function UploadResumeModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isLoading
+}) {
+ 
+  console.log("UploadResumeModal rendered");
+console.log("isOpen =", isOpen);
   const [file, setFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFile(null)
+      setJobDescription('')
+    }
+  }, [isOpen])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+
     if (!file) {
-      alert('Please choose a PDF resume first')
+      alert('Please upload your resume.')
       return
     }
+
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF resumes are allowed.')
+      return
+    }
+
+    if (!jobDescription.trim()) {
+      alert('Please paste the job description.')
+      return
+    }
+
     await onSubmit(file, jobDescription)
-    setFile(null)
-    setJobDescription('')
   }
 
   const handleDragOver = (e) => {
@@ -25,125 +58,169 @@ function UploadResumeModal({ isOpen, onClose, onSubmit, isLoading }) {
   const handleDrop = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    const droppedFiles = e.dataTransfer.files
-    if (droppedFiles.length > 0) {
-      setFile(droppedFiles[0])
+
+    const droppedFile = e.dataTransfer.files[0]
+
+    if (!droppedFile) return
+
+    if (droppedFile.type !== 'application/pdf') {
+      alert('Only PDF resumes are allowed.')
+      return
     }
+
+    setFile(droppedFile)
   }
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-          {/* Backdrop */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => !isLoading && onClose()}
-            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
-          />
-          
-          {/* Modal */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 z-10 overflow-hidden"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-8 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-indigo-600" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900">New Gap Analysis</h2>
-                  <p className="text-sm text-slate-600">Upload your resume and target role</p>
-                </div>
-              </div>
-              <button 
-                onClick={onClose}
-                disabled={isLoading}
-                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+  const closeModal = () => {
+    if (!isLoading) {
+      onClose()
+    }
+  }
+  if (!isOpen) return null;
 
-            {/* Content */}
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              {/* File Upload */}
+return (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
+      <h2 className="text-2xl font-bold mb-4">
+        Upload Resume
+      </h2>
+
+      {/* Your form here */}
+      <form
+              onSubmit={handleSubmit}
+              className="space-y-7 p-8"
+            >
+
+              {/* Resume */}
+
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
-                  Upload Resume (PDF)
+
+                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                  Resume PDF
+                  <span className="ml-1 text-red-500">*</span>
                 </label>
-                
+
                 <div
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  className="relative"
                 >
-                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 cursor-pointer transition-all duration-200"
+
+                  <label
+                    className="flex h-52 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-indigo-500 hover:bg-indigo-50"
                   >
-                    <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                      <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
-                      <span className="text-base font-semibold text-slate-700">
-                        {file ? file.name : "Drag & drop or click to select"}
-                      </span>
-                      <span className="text-sm text-slate-500 mt-1">PDF file (Max 10MB)</span>
-                    </div>
-                    <input 
-                      type="file" 
-                      accept=".pdf" 
-                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+
+                    {file ? (
+                      <>
+
+                        <CheckCircle className="mb-3 h-10 w-10 text-green-600" />
+
+                        <p className="text-lg font-semibold text-slate-900">
+                          {file.name}
+                        </p>
+
+                        <p className="mt-2 text-sm text-green-600">
+                          Ready to upload
+                        </p>
+
+                      </>
+                    ) : (
+                      <>
+
+                        <UploadCloud className="mb-3 h-10 w-10 text-slate-400" />
+
+                        <p className="text-lg font-semibold text-slate-800">
+                          Drag & Drop Resume
+                        </p>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                          or click to browse
+                        </p>
+
+                        <p className="mt-3 text-xs text-slate-400">
+                          PDF only • Max 10 MB
+                        </p>
+
+                      </>
+                    )}
+
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      hidden
                       disabled={isLoading}
-                      className="hidden"
+                      onChange={(e) =>
+                        setFile(e.target.files?.[0] || null)
+                      }
                     />
+
                   </label>
+
                 </div>
+
               </div>
 
               {/* Job Description */}
+
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
+
+                <label className="mb-3 block text-sm font-semibold text-slate-900">
                   Target Job Description
+                  <span className="ml-1 text-red-500">*</span>
                 </label>
+
                 <textarea
-                  placeholder="Paste the target job description or requirements here..."
+                  rows={8}
+                  disabled={isLoading}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  disabled={isLoading}
-                  rows={6}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none bg-slate-50 text-slate-900 placeholder-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Paste the complete job description from LinkedIn, Naukri, Indeed, or any company careers page..."
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                 />
+
+                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+
+                  <span>
+                    More detailed job descriptions produce better AI analysis.
+                  </span>
+
+                  <span>
+                    {jobDescription.length} characters
+                  </span>
+
+                </div>
+
               </div>
 
-              {/* Submit Button */}
-              <button 
-                type="submit" 
-                disabled={isLoading || !file}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-semibold rounded-lg text-base shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all duration-200 disabled:shadow-none flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              {/* Button */}
+
+              <button
+                type="submit"
+                disabled={
+                  isLoading ||
+                  !file ||
+                  !jobDescription.trim()
+                }
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-4 text-base font-semibold text-white shadow-lg transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
+
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Analyzing Resume...</span>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Analyzing Resume...
                   </>
                 ) : (
                   <>
-                    <span>Start Gap Analysis</span>
-                    <ArrowRight className="w-5 h-5" />
+                    Start Gap Analysis
+                    <ArrowRight className="h-5 w-5" />
                   </>
                 )}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  )
-}
 
-export default UploadResumeModal
+              </button>
+
+            </form>
+
+
+    </div>
+  </div>
+)
+  }  export default UploadResumeModal

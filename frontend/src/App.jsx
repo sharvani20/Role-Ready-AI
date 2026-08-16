@@ -1,10 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
+import ResumeAnalyzer from './pages/ResumeAnalyzer'
 import Analysis from './pages/Analysis'
-import ResumeHistory from './pages/ResumeHistory'
-import Profile from './pages/Profile'
+import PastRecords from './pages/PastRecords'
 import ProtectedRoute from './components/ProtectedRoute'
 import SidebarLayout from './components/SidebarLayout'
 import Roadmap from './pages/roadmap'
@@ -18,14 +17,20 @@ function App() {
       <Route path="/register" element={<Register />} />
 
       <Route
-        path="/dashboard"
+        path="/resume-analyzer"
         element={
           <ProtectedRoute>
             <SidebarLayout>
-              <Dashboard />
+              <ResumeAnalyzer />
             </SidebarLayout>
           </ProtectedRoute>
         }
+      />
+
+      {/* Keep /dashboard redirecting to resume-analyzer for backwards compat */}
+      <Route
+        path="/dashboard"
+        element={<Navigate to="/resume-analyzer" replace />}
       />
 
       <Route
@@ -40,22 +45,28 @@ function App() {
       />
 
       <Route
-        path="/resumes"
+        path="/past-records"
         element={
           <ProtectedRoute>
             <SidebarLayout>
-              <ResumeHistory />
+              <PastRecords />
             </SidebarLayout>
           </ProtectedRoute>
         }
       />
 
+      {/* Keep old /resumes route redirecting */}
       <Route
-        path="/profile"
+        path="/resumes"
+        element={<Navigate to="/past-records" replace />}
+      />
+
+      <Route
+        path="/roadmap"
         element={
           <ProtectedRoute>
             <SidebarLayout>
-              <Profile />
+              <Roadmap />
             </SidebarLayout>
           </ProtectedRoute>
         }

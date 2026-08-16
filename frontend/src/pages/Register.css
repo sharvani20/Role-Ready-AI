@@ -1,0 +1,9 @@
+@import "./Login.css";
+
+.register-page .login-card {
+  max-width: 480px;
+}
+
+.register-page .login-form {
+  gap: 0;
+}

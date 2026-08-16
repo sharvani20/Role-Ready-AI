@@ -13,6 +13,9 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=MessageResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
+    if len(user.password) < 6:
+        raise HTTPException(400, "Password must be at least 6 characters long")
+
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(400, "Email already registered")

@@ -1,52 +1,86 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Login.css";
 
 function Login() {
-  const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
-  const navigate = useNavigate()
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault()
+    e.preventDefault();
 
-    const formData = new FormData()
-    formData.append('username', name)
-    formData.append('password', password)
+    const formData = new FormData();
+    formData.append("username", name);
+    formData.append("password", password);
 
-    const response = await fetch('http://127.0.0.1:8000/auth/login', {
-      method: 'POST',
+    const response = await fetch("http://127.0.0.1:8000/auth/login", {
+      method: "POST",
       body: formData,
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (!response.ok) {
-      alert(data.detail)
-      return
+      alert(data.detail);
+      return;
     }
 
-    localStorage.setItem('token', data.access_token)
-    navigate('/dashboard')
+    localStorage.setItem("token", data.access_token);
+    navigate("/resume-analyzer");
   }
 
   return (
-    <div className="auth-container">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Role Ready AI</h1>
-        <h2>Login</h2>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand">
+          <span className="login-brand-badge">✨ AI Placement Coach</span>
+          <h2>RoleReady AI</h2>
+        </div>
 
-        <input placeholder="Username" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="login-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to continue your placement journey.</p>
+        </div>
 
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Username"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
+          <div className="input-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <p>
-          Don’t have an account? <Link to="/register">Register</Link>
-        </p>
-      </form>
+          <button type="submit" className="login-btn">
+            Sign In
+          </button>
+        </form>
+
+        <div className="divider">
+          <span>OR</span>
+        </div>
+
+        <p className="register-text">Don&apos;t have an account?</p>
+
+        <Link to="/register" className="register-btn">
+          Create Account
+        </Link>
+      </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

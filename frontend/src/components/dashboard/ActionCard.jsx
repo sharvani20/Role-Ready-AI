@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import './ActionCard.css'
 
 function ActionCard({ icon: Icon, title, description, onAction }) {
   return (
@@ -7,25 +8,26 @@ function ActionCard({ icon: Icon, title, description, onAction }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6 }}
       onClick={onAction}
-      className="p-6 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col h-full group"
+      className="custom-action-card"
     >
-      <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-        <Icon className="w-6 h-6" />
+      <div className="card-top-gradient-line"></div>
+
+      <div className="action-icon-box">
+        <Icon className="icon-svg" />
       </div>
       
-      <h3 className="font-semibold text-slate-900 text-base mb-2">
-        {title}
-      </h3>
+      <div className="action-content">
+        <h3 className="action-title">{title}</h3>
+        <p className="action-description">{description}</p>
+      </div>
       
-      <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-1">
-        {description}
-      </p>
-      
-      <div className="flex items-center text-sm font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
-        <span>Get started</span>
-        <ChevronRight className="w-4 h-4 ml-1" />
+      <div className="action-footer">
+        <span className="action-link-text">Get started</span>
+        <div className="action-arrow-box">
+          <ChevronRight className="icon-small" />
+        </div>
       </div>
     </motion.div>
   )
