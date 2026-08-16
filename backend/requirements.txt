@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 pydantic
-
+gunicorn
 sqlalchemy
 psycopg2-binary
 python-jose[cryptography]
