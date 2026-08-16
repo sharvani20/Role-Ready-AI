@@ -1,0 +1,3 @@
+## 2025-05-18 - Modal Dialog Accessibility and Form Control Associations
+**Learning:** In modal dialog components (e.g. `UploadResumeModal`), icon-only buttons (such as the close button) and form controls require explicit ARIA attributes (`aria-label`, `role="dialog"`, `aria-modal="true"`, `aria-labelledby`) and matching `htmlFor`/`id` bindings for proper screen reader announcement and keyboard navigation accessibility.
+**Action:** Always check modal wrappers for proper dialog ARIA roles and ensure all interactive elements and form inputs in modals have explicit labels or `aria-label` attributes.
