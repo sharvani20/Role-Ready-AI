@@ -45,7 +45,11 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
+            <label htmlFor="username-input" className="input-label">
+              Username or Email
+            </label>
             <input
+              id="username-input"
               type="text"
               placeholder="Username"
               value={name}
@@ -55,7 +59,11 @@ function Login() {
           </div>
 
           <div className="input-group">
+            <label htmlFor="password-input" className="input-label">
+              Password
+            </label>
             <input
+              id="password-input"
               type="password"
               placeholder="Password"
               value={password}
