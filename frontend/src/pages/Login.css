@@ -98,6 +98,14 @@
   margin-bottom: 1rem;
 }
 
+.input-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
 .input-group input {
   width: 100%;
   padding: 0.9375rem 1.125rem;
