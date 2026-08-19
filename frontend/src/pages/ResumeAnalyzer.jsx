@@ -152,30 +152,41 @@ function ResumeAnalyzer() {
             {/* Resume Section */}
             <div className="ra-field-group">
               <div className="ra-section-header">
-                <span className="ra-section-num">1. Candidate Resume (PDF / Text)</span>
+                <label htmlFor="resume-text-input" className="ra-section-num">1. Candidate Resume (PDF / Text)</label>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => resumeFileRef.current?.click()}
+                  aria-label="Upload Candidate Resume PDF"
                 >
                   <Upload size={14} />
                   Upload Resume PDF
                 </button>
                 <input
+                  id="resume-file-input"
                   ref={resumeFileRef}
                   type="file"
                   accept=".pdf"
                   hidden
                   onChange={handleResumeFileUpload}
+                  aria-label="Upload Resume PDF file"
                 />
               </div>
               {resumeFile && (
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{resumeFile.name}</span>
-                  <button onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded candidate resume PDF"
+                    onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
+                id="resume-text-input"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste your resume content here OR click 'Upload Resume PDF' above..."
@@ -187,30 +198,41 @@ function ResumeAnalyzer() {
             {/* Job Description Section */}
             <div className="ra-field-group">
               <div className="ra-section-header">
-                <span className="ra-section-num">2. Job Description (PDF / Text)</span>
+                <label htmlFor="job-desc-text-input" className="ra-section-num">2. Job Description (PDF / Text)</label>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => jobDescFileRef.current?.click()}
+                  aria-label="Upload Job Description PDF"
                 >
                   <Upload size={14} />
                   Upload Job Description PDF
                 </button>
                 <input
+                  id="job-desc-file-input"
                   ref={jobDescFileRef}
                   type="file"
                   accept=".pdf"
                   hidden
                   onChange={handleJobDescFileUpload}
+                  aria-label="Upload Job Description PDF file"
                 />
               </div>
               {jobDescFile && (
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{jobDescFile.name}</span>
-                  <button onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded job description PDF"
+                    onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
+                id="job-desc-text-input"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste job description text here OR click 'Upload Job Description PDF' above..."
