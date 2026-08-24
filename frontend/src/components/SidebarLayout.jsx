@@ -61,9 +61,10 @@ function SidebarLayout({ children }) {
         key={item.name}
         to={item.path}
         className={`nav-link ${isActive ? 'active' : ''}`}
+        aria-current={isActive ? 'page' : undefined}
       >
         <span className="nav-icon-wrapper">
-          {Icon && <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />}
+          {Icon && <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} aria-hidden="true" />}
         </span>
         <span className="nav-text">{item.name}</span>
       </Link>
@@ -99,8 +100,8 @@ function SidebarLayout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-btn">
-            <LogOut size={16} />
+          <button onClick={handleLogout} className="logout-btn" aria-label="Log out of application">
+            <LogOut size={16} aria-hidden="true" />
             <span>Logout</span>
           </button>
         </div>
