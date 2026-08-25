@@ -45,21 +45,33 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
+            <label htmlFor="login-username" className="sr-only">
+              Username or Email
+            </label>
             <input
+              id="login-username"
               type="text"
-              placeholder="Username"
+              placeholder="Username or Email"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              autoComplete="username"
+              aria-required="true"
               required
             />
           </div>
 
           <div className="input-group">
+            <label htmlFor="login-password" className="sr-only">
+              Password
+            </label>
             <input
+              id="login-password"
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              aria-required="true"
               required
             />
           </div>
