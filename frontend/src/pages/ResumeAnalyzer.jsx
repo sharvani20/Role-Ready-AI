@@ -172,10 +172,18 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{resumeFile.name}</span>
-                  <button onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded candidate resume PDF"
+                    onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
+                id="resume-text-input"
+                aria-label="Candidate Resume Text"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste your resume content here OR click 'Upload Resume PDF' above..."
@@ -207,10 +215,18 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{jobDescFile.name}</span>
-                  <button onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded job description PDF"
+                    onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
+                id="job-desc-text-input"
+                aria-label="Job Description Text"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste job description text here OR click 'Upload Job Description PDF' above..."
