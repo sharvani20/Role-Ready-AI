@@ -80,10 +80,6 @@ function Dashboard() {
       }
     }
   }, [])
-  useEffect(() => {
-  console.log("modalOpen =", modalOpen)
-}, [modalOpen])
-
   const handleUploadSubmit = async (file, jobDescription) => {
     const token = localStorage.getItem('token')
     if (!token) {
@@ -218,10 +214,7 @@ console.log("Dashboard render, modalOpen =", modalOpen)
           <HeroSection
             isProgressView={isProgressView}
             summary={summary}
-            onUploadClick={() => {console.log("Upload button clicked"); setModalOpen(true)}}
-             
-
-
+            onUploadClick={() => setModalOpen(true)}
             onViewHistoryClick={() => navigate('/resumes')}
             circumference={circumference}
             scoreVal={scoreVal}
