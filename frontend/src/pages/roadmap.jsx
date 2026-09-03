@@ -18,44 +18,51 @@ function Roadmap() {
   const [missingSkills, setMissingSkills] = useState('')
   const [generating, setGenerating] = useState(false)
 
-  const loadRoadmap = async () => {
-    if (!id) return
-    setLoading(true)
-    setError(null)
-    const token = localStorage.getItem('token')
-
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/roadmap/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Roadmap not found. Please ensure analysis is complete.')
-        }
-        throw new Error('Failed to load roadmap. Please try again later.')
-      }
-
-      const data = await response.json()
-      setRoadmap(data)
-
-      const storedCompleted = localStorage.getItem(`role_ready_roadmap_${id}_completed`)
-      if (storedCompleted) {
-        setCompletedWeeks(JSON.parse(storedCompleted))
-      } else {
-        setCompletedWeeks([])
-      }
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    if (id) {
-      loadRoadmap()
+    if (!id) return
+
+    let isMounted = true
+
+    const loadRoadmap = async () => {
+      setLoading(true)
+      setError(null)
+      const token = localStorage.getItem('token')
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/roadmap/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Roadmap not found. Please ensure analysis is complete.')
+          }
+          throw new Error('Failed to load roadmap. Please try again later.')
+        }
+
+        const data = await response.json()
+        if (!isMounted) return
+
+        setRoadmap(data)
+
+        const storedCompleted = localStorage.getItem(`role_ready_roadmap_${id}_completed`)
+        if (storedCompleted) {
+          setCompletedWeeks(JSON.parse(storedCompleted))
+        } else {
+          setCompletedWeeks([])
+        }
+      } catch (err) {
+        console.error(err)
+        if (isMounted) setError(err.message)
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    loadRoadmap()
+
+    return () => {
+      isMounted = false
     }
   }, [id])
 
@@ -115,16 +122,6 @@ function Roadmap() {
     setCompletedWeeks(updated)
     if (id) {
       localStorage.setItem(`role_ready_roadmap_${id}_completed`, JSON.stringify(updated))
-    }
-  }
-
-  const getResourceIcon = (iconType) => {
-    switch (iconType?.toLowerCase()) {
-      case 'video': return '🎥'
-      case 'code': return '💻'
-      case 'book': return '📘'
-      case 'article': return '📄'
-      default: return '🔗'
     }
   }
 
@@ -198,7 +195,7 @@ function Roadmap() {
         <span className="rm-error-icon">⚠️</span>
         <h2>Something went wrong</h2>
         <p>{error}</p>
-        <button onClick={loadRoadmap} className="rm-retry-btn">Try Again</button>
+        <button onClick={() => window.location.reload()} className="rm-retry-btn">Try Again</button>
       </div>
     )
   }

@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FileText,
   X,
   UploadCloud,
   Loader2,
@@ -16,18 +14,31 @@ function UploadResumeModal({
   onSubmit,
   isLoading
 }) {
- 
-  console.log("UploadResumeModal rendered");
-console.log("isOpen =", isOpen);
   const [file, setFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
 
   useEffect(() => {
     if (!isOpen) {
+      return
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading, onClose])
+
+  const handleClose = () => {
+    if (!isLoading) {
       setFile(null)
       setJobDescription('')
+      onClose()
     }
-  }, [isOpen])
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -71,43 +82,42 @@ console.log("isOpen =", isOpen);
     setFile(droppedFile)
   }
 
-  const closeModal = () => {
-    if (!isLoading) {
-      onClose()
-    }
-  }
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold mb-4">
-        Upload Resume
-      </h2>
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl p-6 sm:p-8 shadow-2xl relative">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">
+            Upload Resume
+          </h2>
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isLoading}
+            aria-label="Close modal"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition disabled:opacity-50"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-      {/* Your form here */}
-      <form
-              onSubmit={handleSubmit}
-              className="space-y-7 p-8"
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Resume */}
+          <div>
+            <label
+              htmlFor="resume-upload"
+              className="mb-3 block text-sm font-semibold text-slate-900"
             >
+              Resume PDF
+              <span className="ml-1 text-red-500">*</span>
+            </label>
 
-              {/* Resume */}
-
-              <div>
-
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
-                  Resume PDF
-                  <span className="ml-1 text-red-500">*</span>
-                </label>
-
-                <div
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-
-                  <label
-                    className="flex h-52 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-indigo-500 hover:bg-indigo-50"
-                  >
+            <div onDragOver={handleDragOver} onDrop={handleDrop}>
+              <label
+                htmlFor="resume-upload"
+                className="flex h-52 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-indigo-500 hover:bg-indigo-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200"
+              >
 
                     {file ? (
                       <>
@@ -144,9 +154,10 @@ return (
                     )}
 
                     <input
+                      id="resume-upload"
                       type="file"
                       accept=".pdf"
-                      hidden
+                      className="sr-only"
                       disabled={isLoading}
                       onChange={(e) =>
                         setFile(e.target.files?.[0] || null)
@@ -162,14 +173,17 @@ return (
               {/* Job Description */}
 
               <div>
-
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                <label
+                  htmlFor="job-description"
+                  className="mb-3 block text-sm font-semibold text-slate-900"
+                >
                   Target Job Description
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
                 <textarea
-                  rows={8}
+                  id="job-description"
+                  rows={6}
                   disabled={isLoading}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}

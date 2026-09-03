@@ -23,8 +23,6 @@ function Analysis() {
 
   useEffect(() => {
     if (location.state?.analysis) {
-      setAnalysis(location.state.analysis)
-      setLoading(false)
       return
     }
 

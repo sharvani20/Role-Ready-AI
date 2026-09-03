@@ -5,7 +5,7 @@ import './ResumeAnalyzer.css'
 
 function ResumeAnalyzer() {
   const navigate = useNavigate()
-  const [jobTitle, setJobTitle] = useState('')
+  const [, setJobTitle] = useState('')
   const [resumeText, setResumeText] = useState('')
   const [resumeFile, setResumeFile] = useState(null)
   const [jobDescText, setJobDescText] = useState('')

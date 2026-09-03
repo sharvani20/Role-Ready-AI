@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FileText, Calendar, Award, Sparkles, ArrowRight } from 'lucide-react'
 import HeroSection from '../components/dashboard/HeroSection'
@@ -13,76 +13,83 @@ import './Dashboard.css'
 
 function Dashboard() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const isProgressView = new URLSearchParams(location.search).get('view') === 'progress'
 
   const [summary, setSummary] = useState({ has_resume: false })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [, setLoading] = useState(true)
+  const [, setError] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [roadmapProgress, setRoadmapProgress] = useState({ percent: 0, completedCount: 0, text: '0/4 weeks' })
-  const [mockInterviewStats, setMockInterviewStats] = useState({ count: 0, avgScore: 'N/A' })
-  const [recentInterviews, setRecentInterviews] = useState([])
-
-  const fetchSummary = async () => {
-    setLoading(true)
-    setError(null)
-    const token = localStorage.getItem('token')
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/resumes/latest/summary', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch summary data from dashboard api.')
-      }
-
-      const data = await response.json()
-      setSummary(data)
-
-      if (data.has_resume && data.resume_id) {
-        const completedKey = `role_ready_roadmap_${data.resume_id}_completed`
-        const completedStr = localStorage.getItem(completedKey)
-        const completedList = completedStr ? JSON.parse(completedStr) : []
-        const percent = Math.round((completedList.length / 4) * 100)
-        setRoadmapProgress({
-          percent: percent,
-          completedCount: completedList.length,
-          text: `${completedList.length}/4 weeks completed`
-        })
-      } else {
-        setRoadmapProgress({ percent: 0, completedCount: 0, text: 'No active roadmap' })
-      }
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchSummary()
-
+  const [mockInterviewStats] = useState(() => {
     const interviewsStr = localStorage.getItem('role_ready_completed_interviews')
     if (interviewsStr) {
       const interviews = JSON.parse(interviewsStr)
-      setRecentInterviews(interviews.slice(-3).reverse())
       if (interviews.length > 0) {
         const totalScore = interviews.reduce((sum, item) => sum + item.score, 0)
         const avg = Math.round(totalScore / interviews.length)
-        setMockInterviewStats({
-          count: interviews.length,
-          avgScore: `${avg}/100`
-        })
+        return { count: interviews.length, avgScore: `${avg}/100` }
       }
     }
-  }, [])
+    return { count: 0, avgScore: 'N/A' }
+  })
+  const [recentInterviews] = useState(() => {
+    const interviewsStr = localStorage.getItem('role_ready_completed_interviews')
+    if (interviewsStr) {
+      const interviews = JSON.parse(interviewsStr)
+      return interviews.slice(-3).reverse()
+    }
+    return []
+  })
+
   useEffect(() => {
-  console.log("modalOpen =", modalOpen)
-}, [modalOpen])
+    let isMounted = true
+
+    const fetchSummary = async () => {
+      setLoading(true)
+      setError(null)
+      const token = localStorage.getItem('token')
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/resumes/latest/summary', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch summary data from dashboard api.')
+        }
+
+        const data = await response.json()
+        if (!isMounted) return
+
+        setSummary(data)
+
+        if (data.has_resume && data.resume_id) {
+          const completedKey = `role_ready_roadmap_${data.resume_id}_completed`
+          const completedStr = localStorage.getItem(completedKey)
+          const completedList = completedStr ? JSON.parse(completedStr) : []
+          const percent = Math.round((completedList.length / 4) * 100)
+          setRoadmapProgress({
+            percent: percent,
+            completedCount: completedList.length,
+            text: `${completedList.length}/4 weeks completed`
+          })
+        } else {
+          setRoadmapProgress({ percent: 0, completedCount: 0, text: 'No active roadmap' })
+        }
+      } catch (err) {
+        console.error(err)
+        if (isMounted) setError(err.message)
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchSummary()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleUploadSubmit = async (file, jobDescription) => {
     const token = localStorage.getItem('token')
@@ -216,7 +223,6 @@ console.log("Dashboard render, modalOpen =", modalOpen)
         <div className="space-y-8">
           {/* Hero Section */}
           <HeroSection
-            isProgressView={isProgressView}
             summary={summary}
             onUploadClick={() => {console.log("Upload button clicked"); setModalOpen(true)}}
              
