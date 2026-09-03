@@ -3,7 +3,6 @@ import { Sparkles, ArrowRight, TrendingUp, CheckCircle2 } from 'lucide-react'
 import './HeroSection.css'
 
 function HeroSection({ 
-  isProgressView, 
   summary, 
   onUploadClick, 
   onViewHistoryClick,

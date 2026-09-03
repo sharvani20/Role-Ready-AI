@@ -37,6 +37,6 @@ export const api = async (endpoint, options = {}) => {
 
     return response.json();
   } catch (err) {
-    throw new Error(err.message || 'Request failed');
+    throw new Error(err.message || 'Request failed', { cause: err });
   }
 };

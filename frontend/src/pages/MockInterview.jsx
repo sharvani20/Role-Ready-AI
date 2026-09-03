@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import {
   Mic,
   Loader2,
-  Rocket,
   CheckCircle2,
   AlertTriangle,
   Lightbulb,
@@ -41,6 +39,7 @@ const INTERVIEW_QUESTIONS = {
   ]
 }
 
+/* eslint-disable no-unused-vars */
 const EVALUATION_TEMPLATES = {
   software: {
     score: 82,
@@ -143,7 +142,7 @@ function MockInterview() {
   const navigate = useNavigate()
   const [step, setStep] = useState('setup') // setup, active, loading, report
   const [category, setCategory] = useState('software')
-  const [level, setLevel] = useState('mid')
+  const [level] = useState('mid')
   const [targetRole, setTargetRole] = useState('Full Stack Engineer')
   const [focusSkills, setFocusSkills] = useState(['Docker', 'System Design', 'CI/CD'])
   const [skillInput, setSkillInput] = useState('')
@@ -260,22 +259,23 @@ function MockInterview() {
       const keywordScore = Math.min((matchedKeywords.length / 4) * 100, 100)
 
       // Communication: answer length and sentence structure
-      let commScore = 0
-      if (wordCount < 10) {
-        commScore = 15
-        shortCount++
-      } else if (wordCount < 30) {
-        commScore = 40
-        shortCount++
-      } else if (wordCount < 60) {
-        commScore = 65
-      } else if (wordCount < 120) {
-        commScore = 80
+      const calculateCommScore = (count) => {
+        if (count < 10) {
+          shortCount++
+          return 15
+        }
+        if (count < 30) {
+          shortCount++
+          return 40
+        }
+        if (count < 60) {
+          return 65
+        }
         goodCount++
-      } else {
-        commScore = 92
-        goodCount++
+        return count < 120 ? 80 : 92
       }
+
+      const answerCommScore = calculateCommScore(wordCount)
 
       // Structure: checks for explanations, examples, multiple sentences
       let structScore = 0
@@ -293,7 +293,7 @@ function MockInterview() {
       structScore = Math.min(structScore, 100)
 
       totalAccuracy += keywordScore
-      totalCommunication += commScore
+      totalCommunication += answerCommScore
       totalStructure += structScore
     })
 
