@@ -1,0 +1,3 @@
+## 2025-03-04 - Accessible Modal Dialogs and Keyboard Navigation
+**Learning:** Modal dialogs require proper dialog ARIA roles (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`), an explicit `Escape` keydown listener, backdrop click dismiss behavior, and accessible close buttons (`aria-label="Close modal"`). Additionally, file input controls inside drop zones should use screen-reader accessible styling (`sr-only` with `focus-within` wrappers) rather than `hidden` so keyboard users can navigate to them.
+**Action:** When creating or editing modal components, ensure proper ARIA attributes, keyboard escape listener, `htmlFor`/`id` form label bindings, and visible focus states for drop zones.
