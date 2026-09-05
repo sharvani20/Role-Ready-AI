@@ -17,8 +17,6 @@ function UploadResumeModal({
   isLoading
 }) {
  
-  console.log("UploadResumeModal rendered");
-console.log("isOpen =", isOpen);
   const [file, setFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
 
@@ -26,8 +24,18 @@ console.log("isOpen =", isOpen);
     if (!isOpen) {
       setFile(null)
       setJobDescription('')
+      return
     }
-  }, [isOpen])
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading, onClose])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -71,19 +79,25 @@ console.log("isOpen =", isOpen);
     setFile(droppedFile)
   }
 
-  const closeModal = () => {
-    if (!isLoading) {
-      onClose()
-    }
-  }
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold mb-4">
-        Upload Resume
-      </h2>
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">
+            Upload Resume
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isLoading}
+            aria-label="Close modal"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition disabled:opacity-50"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
       {/* Your form here */}
       <form
@@ -163,12 +177,13 @@ return (
 
               <div>
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                <label htmlFor="modal-job-description" className="mb-3 block text-sm font-semibold text-slate-900">
                   Target Job Description
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
                 <textarea
+                  id="modal-job-description"
                   rows={8}
                   disabled={isLoading}
                   value={jobDescription}
