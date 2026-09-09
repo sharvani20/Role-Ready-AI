@@ -26,8 +26,18 @@ console.log("isOpen =", isOpen);
     if (!isOpen) {
       setFile(null)
       setJobDescription('')
+      return
     }
-  }, [isOpen])
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isLoading) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading, onClose])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -76,14 +86,34 @@ console.log("isOpen =", isOpen);
       onClose()
     }
   }
+
   if (!isOpen) return null;
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold mb-4">
-        Upload Resume
-      </h2>
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
+      onClick={closeModal}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-resume-title"
+        className="relative bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={closeModal}
+          disabled={isLoading}
+          aria-label="Close modal"
+          className="absolute right-6 top-6 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <h2 id="upload-resume-title" className="text-2xl font-bold mb-4 text-slate-900">
+          Upload Resume
+        </h2>
 
       {/* Your form here */}
       <form
@@ -95,7 +125,7 @@ return (
 
               <div>
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                <label htmlFor="resume-file" className="mb-3 block text-sm font-semibold text-slate-900">
                   Resume PDF
                   <span className="ml-1 text-red-500">*</span>
                 </label>
@@ -106,6 +136,7 @@ return (
                 >
 
                   <label
+                    htmlFor="resume-file"
                     className="flex h-52 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-indigo-500 hover:bg-indigo-50"
                   >
 
@@ -144,9 +175,10 @@ return (
                     )}
 
                     <input
+                      id="resume-file"
                       type="file"
                       accept=".pdf"
-                      hidden
+                      className="sr-only"
                       disabled={isLoading}
                       onChange={(e) =>
                         setFile(e.target.files?.[0] || null)
@@ -163,12 +195,13 @@ return (
 
               <div>
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                <label htmlFor="job-description" className="mb-3 block text-sm font-semibold text-slate-900">
                   Target Job Description
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
                 <textarea
+                  id="job-description"
                   rows={8}
                   disabled={isLoading}
                   value={jobDescription}
