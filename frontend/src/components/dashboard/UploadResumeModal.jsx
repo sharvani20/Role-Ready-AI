@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FileText,
   X,
   UploadCloud,
   Loader2,
@@ -16,9 +14,6 @@ function UploadResumeModal({
   onSubmit,
   isLoading
 }) {
- 
-  console.log("UploadResumeModal rendered");
-console.log("isOpen =", isOpen);
   const [file, setFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
 
@@ -28,6 +23,16 @@ console.log("isOpen =", isOpen);
       setJobDescription('')
     }
   }, [isOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen && !isLoading) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading, onClose])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -76,20 +81,37 @@ console.log("isOpen =", isOpen);
       onClose()
     }
   }
-  if (!isOpen) return null;
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold mb-4">
-        Upload Resume
-      </h2>
+  if (!isOpen) return null
 
-      {/* Your form here */}
-      <form
-              onSubmit={handleSubmit}
-              className="space-y-7 p-8"
-            >
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-modal-title"
+        className="relative bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 id="upload-modal-title" className="text-2xl font-bold">
+            Upload Resume
+          </h2>
+          <button
+            type="button"
+            onClick={closeModal}
+            disabled={isLoading}
+            aria-label="Close modal"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Your form here */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-7"
+        >
 
               {/* Resume */}
 
@@ -163,12 +185,16 @@ return (
 
               <div>
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900">
+                <label
+                  htmlFor="job-description-input"
+                  className="mb-3 block text-sm font-semibold text-slate-900"
+                >
                   Target Job Description
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
                 <textarea
+                  id="job-description-input"
                   rows={8}
                   disabled={isLoading}
                   value={jobDescription}
