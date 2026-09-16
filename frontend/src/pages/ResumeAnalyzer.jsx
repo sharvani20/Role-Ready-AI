@@ -154,6 +154,7 @@ function ResumeAnalyzer() {
               <div className="ra-section-header">
                 <span className="ra-section-num">1. Candidate Resume (PDF / Text)</span>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => resumeFileRef.current?.click()}
                 >
@@ -172,7 +173,13 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{resumeFile.name}</span>
-                  <button onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded resume file"
+                    onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
@@ -189,6 +196,7 @@ function ResumeAnalyzer() {
               <div className="ra-section-header">
                 <span className="ra-section-num">2. Job Description (PDF / Text)</span>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => jobDescFileRef.current?.click()}
                 >
@@ -207,7 +215,13 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{jobDescFile.name}</span>
-                  <button onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}>✕</button>
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded job description file"
+                    onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
               <textarea
