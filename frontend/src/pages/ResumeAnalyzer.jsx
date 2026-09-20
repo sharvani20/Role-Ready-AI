@@ -154,6 +154,7 @@ function ResumeAnalyzer() {
               <div className="ra-section-header">
                 <span className="ra-section-num">1. Candidate Resume (PDF / Text)</span>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => resumeFileRef.current?.click()}
                 >
@@ -162,6 +163,7 @@ function ResumeAnalyzer() {
                 </button>
                 <input
                   ref={resumeFileRef}
+                  id="resume-pdf-upload"
                   type="file"
                   accept=".pdf"
                   hidden
@@ -172,10 +174,12 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{resumeFile.name}</span>
-                  <button onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}>✕</button>
+                  <button type="button" aria-label="Remove uploaded resume file" onClick={() => { setResumeFile(null); if (resumeFileRef.current) resumeFileRef.current.value = '' }}>✕</button>
                 </div>
               )}
               <textarea
+                id="resume-text-input"
+                aria-label="Candidate resume text content"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste your resume content here OR click 'Upload Resume PDF' above..."
@@ -189,6 +193,7 @@ function ResumeAnalyzer() {
               <div className="ra-section-header">
                 <span className="ra-section-num">2. Job Description (PDF / Text)</span>
                 <button
+                  type="button"
                   className="ra-upload-btn"
                   onClick={() => jobDescFileRef.current?.click()}
                 >
@@ -197,6 +202,7 @@ function ResumeAnalyzer() {
                 </button>
                 <input
                   ref={jobDescFileRef}
+                  id="job-desc-pdf-upload"
                   type="file"
                   accept=".pdf"
                   hidden
@@ -207,10 +213,12 @@ function ResumeAnalyzer() {
                 <div className="ra-file-badge">
                   <FileText size={14} />
                   <span>{jobDescFile.name}</span>
-                  <button onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}>✕</button>
+                  <button type="button" aria-label="Remove uploaded job description file" onClick={() => { setJobDescFile(null); if (jobDescFileRef.current) jobDescFileRef.current.value = '' }}>✕</button>
                 </div>
               )}
               <textarea
+                id="job-desc-text-input"
+                aria-label="Job description text content"
                 className="ra-textarea"
                 rows={5}
                 placeholder="Paste job description text here OR click 'Upload Job Description PDF' above..."
