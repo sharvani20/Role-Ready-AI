@@ -68,14 +68,30 @@ function UploadResume() {
       <h2>RoleReady AI Resume Analysis</h2>
 
       <form onSubmit={handleSubmit}>
-        <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
+        <div style={{ marginBottom: '1rem' }}>
+          <label htmlFor="upload-resume-file" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>
+            Resume PDF <span style={{ color: '#ef4444' }}>*</span>
+          </label>
+          <input
+            id="upload-resume-file"
+            type="file"
+            accept=".pdf"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+        </div>
 
-        <textarea
-          placeholder="Paste job description here..."
-          value={jobDescription}
-          onChange={(e) => setJobDescription(e.target.value)}
-          rows={8}
-        />
+        <div style={{ marginBottom: '1rem' }}>
+          <label htmlFor="upload-job-description" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>
+            Job Description
+          </label>
+          <textarea
+            id="upload-job-description"
+            placeholder="Paste job description here..."
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            rows={8}
+          />
+        </div>
 
         <button type="submit" disabled={loading}>
           {loading ? 'Analyzing...' : 'Run Analysis'}
