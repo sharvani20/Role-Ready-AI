@@ -462,7 +462,7 @@ function MockInterview() {
                 {focusSkills.map((skill) => (
                   <span key={skill} className="mi-skill-tag">
                     {skill}
-                    <button onClick={() => removeSkill(skill)}>×</button>
+                    <button type="button" aria-label={`Remove skill ${skill}`} onClick={() => removeSkill(skill)}>×</button>
                   </span>
                 ))}
               </div>
