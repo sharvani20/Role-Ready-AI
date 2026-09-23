@@ -1,0 +1,3 @@
+## 2025-05-18 - Modal Overlay Accessibility and Interactive Dropzone Pattern
+**Learning:** Modal components in this app lacked keyboard dismissal (Escape key) and proper ARIA role attributes (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`). Additionally, dropzone file selection lacked a dedicated remove action when a file was staged, forcing users to reopen the native file dialog to change files.
+**Action:** Always equip modal dialogs with Escape key event listeners, proper ARIA labeling (`aria-labelledby`), explicit icon button `aria-label`s, and a dedicated clear/remove button for staged file inputs.
