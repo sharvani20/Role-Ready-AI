@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
 import ResumeAnalyzer from './pages/ResumeAnalyzer'
 import Analysis from './pages/Analysis'
 import PastRecords from './pages/PastRecords'
@@ -17,6 +18,17 @@ function App() {
       <Route path="/register" element={<Register />} />
 
       <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <SidebarLayout>
+              <Dashboard />
+            </SidebarLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/resume-analyzer"
         element={
           <ProtectedRoute>
@@ -25,12 +37,6 @@ function App() {
             </SidebarLayout>
           </ProtectedRoute>
         }
-      />
-
-      {/* Keep /dashboard redirecting to resume-analyzer for backwards compat */}
-      <Route
-        path="/dashboard"
-        element={<Navigate to="/resume-analyzer" replace />}
       />
 
       <Route
