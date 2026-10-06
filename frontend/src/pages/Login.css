@@ -96,10 +96,13 @@
 
 .input-group {
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .input-group input {
+  display: block;
   width: 100%;
+  box-sizing: border-box;
   padding: 0.9375rem 1.125rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
@@ -113,6 +116,37 @@
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.password-input-wrapper input {
+  padding-right: 2.75rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  transition: color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #0f172a;
 }
 
 .login-btn {
@@ -130,9 +164,46 @@
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
 }
 
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.login-spinner {
+  animation: login-spin 1s linear infinite;
+}
+
+@keyframes login-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .divider {
