@@ -1,33 +1,44 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import "./Login.css";
 
 function Login() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
 
-    const formData = new FormData();
-    formData.append("username", name);
-    formData.append("password", password);
+    try {
+      const formData = new FormData();
+      formData.append("username", name);
+      formData.append("password", password);
 
-    const response = await fetch("http://127.0.0.1:8000/auth/login", {
-      method: "POST",
-      body: formData,
-    });
+      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      alert(data.detail);
-      return;
+      if (!response.ok) {
+        alert(data.detail || "Login failed");
+        return;
+      }
+
+      localStorage.setItem("token", data.access_token);
+      navigate("/resume-analyzer");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("token", data.access_token);
-    navigate("/resume-analyzer");
   }
 
   return (
@@ -45,7 +56,11 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
+            <label htmlFor="login-username" className="sr-only">
+              Username
+            </label>
             <input
+              id="login-username"
               type="text"
               placeholder="Username"
               value={name}
@@ -55,17 +70,37 @@ function Login() {
           </div>
 
           <div className="input-group">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label htmlFor="login-password" className="sr-only">
+              Password
+            </label>
+            <div className="password-input-wrapper">
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
-          <button type="submit" className="login-btn">
-            Sign In
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? (
+              <span className="login-btn-loading">
+                <Loader2 size={18} className="login-spinner" /> Signing In...
+              </span>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
