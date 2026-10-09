@@ -1,0 +1,3 @@
+## 2025-05-18 - Modal Dialog Accessibility and Keyboard Dismissal
+**Learning:** Modal components in React often lack keyboard accessibility (Escape key support and proper focus ring states) and modal ARIA attributes (`role="dialog"`, `aria-modal="true"`), which degrades accessibility for screen reader and keyboard-only users. Using `sr-only` inputs inside `<label>` wrappers with explicit `htmlFor`/`id` bindings allows native file selection without sacrificing keyboard focus indicators (`focus-within:ring-2`).
+**Action:** Always ensure modal overlays implement `Escape` key event listeners, backdrop click dismissal, `role="dialog"`, accessible close buttons (`aria-label="Close modal"`), and accessible form label associations.
