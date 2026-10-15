@@ -8,6 +8,7 @@ import ProtectedRoute from './components/Protectedroute'
 import SidebarLayout from './components/SidebarLayout'
 import Roadmap from './pages/roadmap'
 import MockInterview from './pages/MockInterview'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
@@ -15,6 +16,17 @@ function App() {
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <SidebarLayout>
+              <Dashboard />
+            </SidebarLayout>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/resume-analyzer"
@@ -25,12 +37,6 @@ function App() {
             </SidebarLayout>
           </ProtectedRoute>
         }
-      />
-
-      {/* Keep /dashboard redirecting to resume-analyzer for backwards compat */}
-      <Route
-        path="/dashboard"
-        element={<Navigate to="/resume-analyzer" replace />}
       />
 
       <Route
