@@ -80,9 +80,6 @@ function Dashboard() {
       }
     }
   }, [])
-  useEffect(() => {
-  console.log("modalOpen =", modalOpen)
-}, [modalOpen])
 
   const handleUploadSubmit = async (file, jobDescription) => {
     const token = localStorage.getItem('token')
@@ -209,7 +206,7 @@ function Dashboard() {
 
   const recAction = getAIRecommendation()
   const activities = getActivities()
-console.log("Dashboard render, modalOpen =", modalOpen)
+
   return (
     <div className="flex-1 flex flex-col min-h-full animate-fade-in">
       <main className="flex-1 max-w-[1600px] w-full mx-auto">
@@ -218,7 +215,7 @@ console.log("Dashboard render, modalOpen =", modalOpen)
           <HeroSection
             isProgressView={isProgressView}
             summary={summary}
-            onUploadClick={() => {console.log("Upload button clicked"); setModalOpen(true)}}
+            onUploadClick={() => setModalOpen(true)}
              
 
 

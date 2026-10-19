@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FileText,
   X,
   UploadCloud,
   Loader2,
@@ -16,18 +14,33 @@ function UploadResumeModal({
   onSubmit,
   isLoading
 }) {
- 
-  console.log("UploadResumeModal rendered");
-console.log("isOpen =", isOpen);
   const [file, setFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
+
+  const closeModal = () => {
+    if (!isLoading) {
+      setFile(null)
+      setJobDescription('')
+      onClose()
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) {
       setFile(null)
       setJobDescription('')
+      return
     }
-  }, [isOpen])
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isLoading) {
+        closeModal()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -71,24 +84,40 @@ console.log("isOpen =", isOpen);
     setFile(droppedFile)
   }
 
-  const closeModal = () => {
-    if (!isLoading) {
-      onClose()
-    }
-  }
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold mb-4">
-        Upload Resume
-      </h2>
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal()
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-resume-modal-title"
+        className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl relative"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 id="upload-resume-modal-title" className="text-2xl font-bold text-slate-900">
+            Upload Resume
+          </h2>
+          <button
+            type="button"
+            onClick={closeModal}
+            disabled={isLoading}
+            aria-label="Close modal"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition disabled:opacity-50"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
       {/* Your form here */}
       <form
               onSubmit={handleSubmit}
-              className="space-y-7 p-8"
+              className="space-y-7 mt-4"
             >
 
               {/* Resume */}
