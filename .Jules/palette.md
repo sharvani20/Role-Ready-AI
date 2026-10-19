@@ -1,0 +1,3 @@
+## 2026-08-16 - Accessible Modal Dialog Dismissal & State Cleanup
+**Learning:** Modal components require `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, and `Escape` key listeners to meet accessibility standards. Form modal state must be reset inside `useEffect` when `isOpen` becomes `false` to prevent stale form inputs upon re-opening regardless of how dismissal is triggered.
+**Action:** Always bind `Escape` key event listeners, overlay click-to-close handlers, explicit `type="button"` and `aria-label` attributes on modal close buttons, and reset local form state when `isOpen` changes to `false`.

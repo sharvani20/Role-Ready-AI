@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ResumeAnalyzer from './pages/ResumeAnalyzer'
 import Analysis from './pages/Analysis'
+import Dashboard from './pages/Dashboard'
 import PastRecords from './pages/PastRecords'
 import ProtectedRoute from './components/Protectedroute'
 import SidebarLayout from './components/SidebarLayout'
@@ -27,10 +28,15 @@ function App() {
         }
       />
 
-      {/* Keep /dashboard redirecting to resume-analyzer for backwards compat */}
       <Route
         path="/dashboard"
-        element={<Navigate to="/resume-analyzer" replace />}
+        element={
+          <ProtectedRoute>
+            <SidebarLayout>
+              <Dashboard />
+            </SidebarLayout>
+          </ProtectedRoute>
+        }
       />
 
       <Route
