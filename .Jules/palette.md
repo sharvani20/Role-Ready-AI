@@ -1,0 +1,3 @@
+## 2025-05-18 - Accessible Modal Dialog Pattern
+**Learning:** In React modal components, closing handlers triggered by keyboard shortcuts (`Escape`) or backdrop clicks must reset internal state by invoking the cleanup/reset handler rather than simply toggling the `isOpen` prop. Furthermore, modal containers require `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, and explicit focus rings and `aria-label`s on dismiss icon buttons.
+**Action:** Always wrap modal keydown listeners to call the modal state reset handler (`closeModal`), attach proper ARIA dialog attributes, and link labels explicitly via `htmlFor` and `id`.
